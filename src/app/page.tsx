@@ -1,9 +1,18 @@
-import { getCurrentSession } from "@/actions/auth"
+import SalesCampaignBanner from "@/components/layout/SalesCampaignBanner"
+import ProductGrid from "@/components/product/ProductGrid"
+import { getAllProducts } from "@/sanity/lib/client"
 
 const Home = async () => {
-  const { user } = await getCurrentSession()
+  const products = await getAllProducts()
 
-  return <div>{JSON.stringify(user, null, 2)}</div>
+  return (
+    <div>
+      <SalesCampaignBanner />
+      <section>
+        <ProductGrid products={products} />
+      </section>
+    </div>
+  )
 }
 
 export default Home
