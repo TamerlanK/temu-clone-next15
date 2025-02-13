@@ -112,7 +112,7 @@ export const updateCartItem = async (
   return getOrCreateCart(cartId)
 }
 
-export const syncCartWithUser = async (cartId: string | null) => {
+export const syncWithUser = async (cartId: string | null) => {
   const { user } = await getCurrentSession()
 
   if (!user) return null

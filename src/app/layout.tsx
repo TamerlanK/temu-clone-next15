@@ -5,6 +5,7 @@ import Header from "@/components/layout/Header"
 import { getCurrentSession } from "@/actions/auth"
 import { SanityLive } from "@/sanity/lib/live"
 import HeaderCategorySelector from "@/components/layout/HeaderCategorySelector"
+import Cart from "@/components/cart/Cart"
 
 const font = Inter({ subsets: ["latin"] })
 
@@ -23,6 +24,7 @@ const RootLayout = async ({
       <body className={`${font.className} antialiased bg-white`}>
         <Header user={user} categorySelector={<HeaderCategorySelector />} />
         {children}
+        <Cart />
         <SanityLive />
       </body>
     </html>

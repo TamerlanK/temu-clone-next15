@@ -1,6 +1,6 @@
 import {
   getOrCreateCart,
-  syncCartWithUser,
+  syncWithUser,
   updateCartItem,
 } from "@/actions/cart-actions"
 import { create } from "zustand"
@@ -42,26 +42,33 @@ export const useCartStore = create<CartStore>()(
 
       setStore: (store) => set(store),
       addItem: async (item) => {
-        const { cartId, items } = get()
+        const { cartId } = get()
         if (!cartId) return
-
-        const existingItem = items.find((i) => i.id === item.id)
-        const existingQuantity = existingItem ? existingItem.quantity : 0
-
-        const addedItemQuantity = existingQuantity + item.quantity
 
         const updatedCart = await updateCartItem(cartId, item.id, {
           title: item.title,
           price: item.price,
           image: item.image,
-          quantity: addedItemQuantity,
+          quantity: item.quantity,
         })
 
         set((state) => {
+          const existingItem = state.items.find((i) => i.id === item.id)
+          if (existingItem) {
+            return {
+              ...state,
+              cartId: updatedCart.id,
+              items: state.items.map((i) =>
+                i.id === item.id
+                  ? { ...i, quantity: i.quantity + item.quantity }
+                  : i
+              ),
+            }
+          }
           return {
             ...state,
             cartId: updatedCart.id,
-            items: [...state.items, { ...item, quantity: addedItemQuantity }],
+            items: [...state.items, { ...item }],
           }
         })
       },
@@ -106,7 +113,7 @@ export const useCartStore = create<CartStore>()(
           set((state) => ({ ...state, cartId: cart.id, items: cart.items }))
         }
 
-        const syncedCart = await syncCartWithUser(cartId)
+        const syncedCart = await syncWithUser(cartId)
 
         if (syncedCart) {
           set((state) => ({
@@ -142,7 +149,7 @@ export const useCartStore = create<CartStore>()(
       },
     }),
     {
-      name: "cart-store",
+      name: "cart-storage",
       skipHydration: true,
     }
   )

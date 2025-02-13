@@ -7,13 +7,16 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import React, { useEffect, useState } from "react"
 import HeaderSearchBar from "./HeaderSearchBar"
+import { useCartStore } from "@/stores/cart-store"
+import { useShallow } from "zustand/shallow"
+import { FREE_SHIPPING_THRESHOLD } from "@/lib/constants"
 
 const AnnouncementBar = () => {
   return (
     <div className="w-full bg-black py-2">
       <div className="container mx-auto flex items-center justify-center px-8">
         <span className="text-center text-sm font-medium text-white tracking-wide">
-          FREE SHIPPING ON ORDERS OVER $100 • FREE RETURNS
+          FREE SHIPPING ON ORDERS OVER ${FREE_SHIPPING_THRESHOLD} • FREE RETURNS
         </span>
       </div>
     </div>
@@ -26,9 +29,17 @@ type HeaderProps = {
 }
 
 const Header = ({ user, categorySelector }: HeaderProps) => {
+  const router = useRouter()
+
   const [isOpen, setIsOpen] = useState<boolean>(true)
   const [prevScrollY, setPrevScrollY] = useState<number>(0)
-  const router = useRouter()
+
+  const { open, getTotalItems } = useCartStore(
+    useShallow((state) => ({
+      open: state.open,
+      getTotalItems: state.getTotalItems,
+    }))
+  )
 
   useEffect(() => {
     const handleScroll = () => {
@@ -86,7 +97,7 @@ const Header = ({ user, categorySelector }: HeaderProps) => {
               </nav>
             </div>
 
-            <Link href={"#"} className="absolute left-1/2 -translate-x-1/2">
+            <Link href="/" className="absolute left-1/2 -translate-x-1/2">
               <span className="text-xl sm:text-2xl font-bold tracking-tight">
                 DEAL
               </span>
@@ -130,7 +141,10 @@ const Header = ({ user, categorySelector }: HeaderProps) => {
                 </React.Fragment>
               )}
 
-              <button className="text-gray-700 hover:text-gray-900 relative">
+              <button
+                onClick={() => open()}
+                className="text-gray-700 hover:text-gray-900 relative"
+              >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   className="h-5 w-5 sm:h-6 sm:w-6"
@@ -146,7 +160,7 @@ const Header = ({ user, categorySelector }: HeaderProps) => {
                   />
                 </svg>
                 <span className="absolute -top-1 -right-1 rounded-full bg-black text-white text-[10px] sm:text-xs w-3.5 h-3.5 sm:w-4 sm:h-4 flex items-center justify-center">
-                  0
+                  {getTotalItems()}
                 </span>
               </button>
             </div>
