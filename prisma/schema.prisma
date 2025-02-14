@@ -41,14 +41,14 @@ model CartLineItem {
   image String
 
   cartId String
-  cart   Cart   @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  cart   Cart   @relation(references: [id], fields: [cartId], onDelete: Cascade)
 }
 
 model Cart {
   id String @id
 
   userId Int?  @unique
-  user   User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user   User? @relation(references: [id], fields: [userId], onDelete: Cascade)
 
   items CartLineItem[]
 }
