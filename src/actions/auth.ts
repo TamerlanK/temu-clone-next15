@@ -1,14 +1,13 @@
 "use server"
-
-import { cookies } from "next/headers"
-import type { Session, User } from "@prisma/client"
-import { sha256 } from "@oslojs/crypto/sha2"
 import {
   encodeBase32LowerCaseNoPadding,
   encodeHexLowerCase,
 } from "@oslojs/encoding"
+import { sha256 } from "@oslojs/crypto/sha2"
 
+import type { User, Session } from "@prisma/client"
 import { prisma } from "@/lib/prisma"
+import { cookies } from "next/headers"
 import { cache } from "react"
 
 export async function generateSessionToken(): Promise<string> {
@@ -66,7 +65,10 @@ export async function validateSessionToken(
     })
   }
 
-  const safeUser = { ...user, passwordHash: undefined }
+  const safeUser = {
+    ...user,
+    passwordHash: undefined,
+  }
 
   return { session, user: safeUser }
 }
@@ -79,7 +81,7 @@ export type SessionValidationResult =
   | { session: Session; user: Omit<User, "passwordHash"> }
   | { session: null; user: null }
 
-// COOKIES
+/* Cookies */
 export async function setSessionTokenCookie(
   token: string,
   expiresAt: Date
@@ -117,7 +119,7 @@ export const getCurrentSession = cache(
   }
 )
 
-// USER AUTHENTICATION
+/* User register, login, logout */
 export const hashPassword = async (password: string) => {
   return encodeHexLowerCase(sha256(new TextEncoder().encode(password)))
 }
@@ -137,7 +139,10 @@ export const registerUser = async (email: string, password: string) => {
       },
     })
 
-    const safeUser = { ...user, passwordHash: undefined }
+    const safeUser = {
+      ...user,
+      passwordHash: undefined,
+    }
 
     return {
       user: safeUser,
@@ -146,7 +151,7 @@ export const registerUser = async (email: string, password: string) => {
   } catch {
     return {
       user: null,
-      error: "Failed to create user",
+      error: "Failed to register user",
     }
   }
 }
@@ -154,7 +159,7 @@ export const registerUser = async (email: string, password: string) => {
 export const loginUser = async (email: string, password: string) => {
   const user = await prisma.user.findUnique({
     where: {
-      email,
+      email: email,
     },
   })
 
@@ -165,9 +170,8 @@ export const loginUser = async (email: string, password: string) => {
     }
   }
 
-  const isPasswordValid = await verifyPassword(password, user.passwordHash)
-
-  if (!isPasswordValid) {
+  const passwordValid = await verifyPassword(password, user.passwordHash)
+  if (!passwordValid) {
     return {
       user: null,
       error: "Invalid password",
@@ -178,7 +182,10 @@ export const loginUser = async (email: string, password: string) => {
   const session = await createSession(token, user.id)
   await setSessionTokenCookie(token, session.expiresAt)
 
-  const safeUser = { ...user, passwordHash: undefined }
+  const safeUser = {
+    ...user,
+    passwordHash: undefined,
+  }
 
   return {
     user: safeUser,
