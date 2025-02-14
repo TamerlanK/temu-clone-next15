@@ -10,6 +10,11 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 
 export const createCheckoutSession = async (cartId: string) => {
   const { user } = await getCurrentSession()
+
+  if (!user) {
+    throw new Error("Unauthorized")
+  }
+
   const cart = await getOrCreateCart(cartId)
 
   if (cart.items.length === 0) {
@@ -20,8 +25,6 @@ export const createCheckoutSession = async (cartId: string) => {
     (acc, item) => acc + item.price * item.quantity,
     0
   )
-
-  console.log(cart.items.map((item) => item.title))
 
   const session = await stripe.checkout.sessions.create({
     mode: "payment",

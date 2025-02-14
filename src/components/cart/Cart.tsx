@@ -52,12 +52,22 @@ const Cart = () => {
     if (!cartId || loadingProceed) return
     setLoadingProceed(true)
     close()
-    const checkoutUrl = await createCheckoutSession(cartId)
 
-    if (checkoutUrl) {
-      window.location.href = checkoutUrl
+    try {
+      const checkoutUrl = await createCheckoutSession(cartId)
+      if (checkoutUrl) {
+        window.location.href = checkoutUrl
+      }
+    } catch (error) {
+      if (error instanceof Error && error.message === "Unauthorized") {
+        window.location.href = `/auth/sign-in`
+      } else {
+        console.error("Checkout error:", error)
+        alert("Error proceeding to checkout. Please try again.")
+      }
+    } finally {
+      setLoadingProceed(false)
     }
-    setLoadingProceed(false)
   }
 
   const totalPrice = getTotalPrice()
