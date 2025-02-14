@@ -5,7 +5,6 @@ import {
 } from "@oslojs/encoding"
 import { sha256 } from "@oslojs/crypto/sha2"
 
-// @ts-ignore - Ignore this error until we have types for prisma
 import type { User, Session } from "@prisma/client"
 import { prisma } from "@/lib/prisma"
 import { cookies } from "next/headers"
