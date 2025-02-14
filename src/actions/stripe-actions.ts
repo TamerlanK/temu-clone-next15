@@ -1,9 +1,8 @@
 "use server"
 
+import { getCurrentSession } from "@/actions/auth"
+import { getOrCreateCart } from "@/actions/cart-actions"
 import Stripe from "stripe"
-import { getCurrentSession } from "./auth"
-import { getOrCreateCart } from "./cart-actions"
-import { FREE_SHIPPING_THRESHOLD } from "@/lib/constants"
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2025-01-27.acacia",
@@ -11,9 +10,6 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 
 export const createCheckoutSession = async (cartId: string) => {
   const { user } = await getCurrentSession()
-
-  if (!user?.id || !user.email) throw new Error("Unauthenticated")
-
   const cart = await getOrCreateCart(cartId)
 
   if (cart.items.length === 0) {
@@ -21,9 +17,11 @@ export const createCheckoutSession = async (cartId: string) => {
   }
 
   const totalPrice = cart.items.reduce(
-    (total, item) => total + item.price * item.quantity,
+    (acc, item) => acc + item.price * item.quantity,
     0
   )
+
+  console.log(cart.items.map((item) => item.title))
 
   const session = await stripe.checkout.sessions.create({
     mode: "payment",
@@ -38,8 +36,8 @@ export const createCheckoutSession = async (cartId: string) => {
       },
       quantity: item.quantity,
     })),
-    success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}`,
+    success_url: `${process.env.NEXT_PUBLIC_BASE_URL!}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL!}`,
     customer_email: user?.email,
     metadata: {
       cartId: cart.id,
@@ -54,12 +52,9 @@ export const createCheckoutSession = async (cartId: string) => {
           type: "fixed_amount",
           fixed_amount: {
             currency: "usd",
-            amount: totalPrice >= FREE_SHIPPING_THRESHOLD ? 0 : 5 * 100,
+            amount: totalPrice >= 15 ? 0 : 5 * 100, // $5.00 USD
           },
-          display_name:
-            totalPrice >= FREE_SHIPPING_THRESHOLD
-              ? "Free Shipping"
-              : "Standard Shipping",
+          display_name: totalPrice >= 15 ? "Free Shipping" : "Shipping",
           delivery_estimate: {
             minimum: {
               unit: "business_day",
