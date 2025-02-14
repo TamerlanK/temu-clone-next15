@@ -1,12 +1,13 @@
 "use client"
 
+import { createCheckoutSession } from "@/actions/stripe-actions"
 import { FREE_SHIPPING_THRESHOLD } from "@/lib/constants"
 import { formatPrice } from "@/lib/utils"
 import { useCartStore } from "@/stores/cart-store"
-import { ShoppingCart, Trash2, X } from "lucide-react"
+import { Loader2, ShoppingCart, Trash2, X } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
-import { useEffect, useMemo } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useShallow } from "zustand/shallow"
 
 const Cart = () => {
@@ -20,8 +21,10 @@ const Cart = () => {
     updateQuantity,
     removeItem,
     getTotalPrice,
+    cartId,
   } = useCartStore(
     useShallow((state) => ({
+      cartId: state.cartId,
       syncWithUser: state.syncWithUser,
       setLoaded: state.setLoaded,
       isOpen: state.isOpen,
@@ -43,6 +46,19 @@ const Cart = () => {
 
     initializeCart()
   }, [])
+
+  const [loadingProceed, setLoadingProceed] = useState<boolean>(false)
+  const handleProceedToCheckout = async () => {
+    if (!cartId || loadingProceed) return
+    setLoadingProceed(true)
+    close()
+    const checkoutUrl = await createCheckoutSession(cartId)
+
+    if (checkoutUrl) {
+      window.location.href = checkoutUrl
+    }
+    setLoadingProceed(false)
+  }
 
   const totalPrice = getTotalPrice()
 
@@ -208,10 +224,18 @@ const Cart = () => {
                     </span>
                   </div>
                   <button
-                    className="w-full bg-black text-white py-2 rounded-full font-bold text-lg hover:bg-gray-900 transition-all transform hover:scale-[1.02] active:scale-[1.02] shadow-xl"
-                    onClick={close}
+                    className="w-full bg-black text-white py-2 rounded-full font-bold text-lg hover:bg-gray-900 transition-all transform hover:scale-[1.02] active:scale-[1.02] shadow-xl disabled:bg-opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:bg-black/50"
+                    onClick={handleProceedToCheckout}
+                    disabled={loadingProceed}
                   >
-                    Proceed to Checkout
+                    {loadingProceed ? (
+                      <div className="flex items-center justify-center gap-1">
+                        <Loader2 className="size-4 animate-spin" />
+                        Processing...
+                      </div>
+                    ) : (
+                      "Proceed to Checkout"
+                    )}
                   </button>
                   <div className="mt-4 space-y-2">
                     <div className="flex items-center gap-2 text-sm text-gray-500">

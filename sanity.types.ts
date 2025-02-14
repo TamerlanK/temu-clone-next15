@@ -68,31 +68,49 @@ export type Geopoint = {
   alt?: number;
 };
 
-export type PromotionCampaign = {
+export type Order = {
   _id: string;
-  _type: "promotionCampaign";
+  _type: "order";
   _createdAt: string;
   _updatedAt: string;
   _rev: string;
-  title?: string;
-  description?: string;
-  code?: {
+  orderNumber?: string;
+  orderDate?: string;
+  customerId?: string;
+  customerName?: string;
+  customerEmail?: string;
+  stripCustomerId?: string;
+  stripeCheckoutSessionId?: string;
+  stripePaymentIntentId?: string;
+  totalPrice?: string;
+  shippingAddress?: ShippingAddress;
+  orderItems?: Array<{
+    _key: string;
+  } & OrderItem>;
+  status?: "processing" | "shipped" | "delivered" | "cancelled";
+};
+
+export type OrderItem = {
+  _type: "orderItem";
+  product?: {
     _ref: string;
     _type: "reference";
     _weak?: boolean;
-    [internalGroqTypeReferenceTo]?: "promotionCode";
+    [internalGroqTypeReferenceTo]?: "product";
   };
+  quantity?: number;
+  price?: number;
 };
 
-export type PromotionCode = {
-  _id: string;
-  _type: "promotionCode";
-  _createdAt: string;
-  _updatedAt: string;
-  _rev: string;
-  code?: string;
-  discountPercentage?: number;
-  expirationDate?: string;
+export type ShippingAddress = {
+  _type: "shippingAddress";
+  name?: string;
+  line1?: string;
+  line2?: string;
+  city?: string;
+  state?: string;
+  postalCode?: string;
+  country?: string;
 };
 
 export type Product = {
@@ -121,23 +139,6 @@ export type Product = {
     _weak?: boolean;
     [internalGroqTypeReferenceTo]?: "productCategory";
   };
-};
-
-export type ProductCategory = {
-  _id: string;
-  _type: "productCategory";
-  _createdAt: string;
-  _updatedAt: string;
-  _rev: string;
-  title?: string;
-  description?: string;
-  slug?: Slug;
-};
-
-export type Slug = {
-  _type: "slug";
-  current?: string;
-  source?: string;
 };
 
 export type SanityImageCrop = {
@@ -197,5 +198,49 @@ export type SanityImageMetadata = {
   isOpaque?: boolean;
 };
 
-export type AllSanitySchemaTypes = SanityImagePaletteSwatch | SanityImagePalette | SanityImageDimensions | SanityFileAsset | Geopoint | PromotionCampaign | PromotionCode | Product | ProductCategory | Slug | SanityImageCrop | SanityImageHotspot | SanityImageAsset | SanityAssetSourceData | SanityImageMetadata;
+export type ProductCategory = {
+  _id: string;
+  _type: "productCategory";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  title?: string;
+  description?: string;
+  slug?: Slug;
+};
+
+export type Slug = {
+  _type: "slug";
+  current?: string;
+  source?: string;
+};
+
+export type PromotionCampaign = {
+  _id: string;
+  _type: "promotionCampaign";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  title?: string;
+  description?: string;
+  code?: {
+    _ref: string;
+    _type: "reference";
+    _weak?: boolean;
+    [internalGroqTypeReferenceTo]?: "promotionCode";
+  };
+};
+
+export type PromotionCode = {
+  _id: string;
+  _type: "promotionCode";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  code?: string;
+  discountPercentage?: number;
+  expirationDate?: string;
+};
+
+export type AllSanitySchemaTypes = SanityImagePaletteSwatch | SanityImagePalette | SanityImageDimensions | SanityFileAsset | Geopoint | Order | OrderItem | ShippingAddress | Product | SanityImageCrop | SanityImageHotspot | SanityImageAsset | SanityAssetSourceData | SanityImageMetadata | ProductCategory | Slug | PromotionCampaign | PromotionCode;
 export declare const internalGroqTypeReferenceTo: unique symbol;
