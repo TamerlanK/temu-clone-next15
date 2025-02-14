@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation"
 import Stripe from "stripe"
+import Link from "next/link"
 
 const getCheckoutSession = async (sessionId: string) => {
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
@@ -59,9 +60,14 @@ const CheckoutSuccessPage = async ({
               currency: session.currency || "USD",
             }).format((session.amount_total || 0) / 100)}
           </div>
-          <div className="text-sm text-gray-500">
+          <div className="text-sm text-gray-500 mb-4">
             Order email: {session.customer_details?.email}
           </div>
+          <Link href="/">
+            <button className="w-fit bg-black text-white py-2 px-6 rounded-full font-bold text-sm hover:bg-gray-900 transition-all transform hover:scale-[1.02] active:scale-[1.02] shadow-xl">
+              Continue shopping
+            </button>
+          </Link>
         </div>
       </div>
     </div>

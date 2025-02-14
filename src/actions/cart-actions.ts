@@ -3,6 +3,8 @@
 import { prisma } from "@/lib/prisma"
 import { getCurrentSession } from "./auth"
 import { revalidatePath } from "next/cache"
+import { urlFor } from "@/sanity/lib/image"
+import { Product } from "@/sanity.types"
 
 export const createCart = async () => {
   const { user } = await getCurrentSession()
@@ -212,4 +214,20 @@ export const syncWithUser = async (cartId: string | null) => {
 
   revalidatePath("/")
   return existingUserCart
+}
+
+export const addWinningItemToCart = async (
+  cartId: string,
+  product: Product
+) => {
+  const cart = await getOrCreateCart(cartId)
+
+  const updatedCart = await updateCartItem(cart.id, product._id, {
+    title: `🎁 ${product.title} (Won)`,
+    price: 0,
+    image: product.image ? urlFor(product.image).url() : "",
+    quantity: 1,
+  })
+
+  return updatedCart
 }
