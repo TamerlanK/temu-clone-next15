@@ -6,7 +6,8 @@ import { Loader2 } from "lucide-react"
 
 type SignUpProps = {
   action: (
-    prevState: unknown,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    prevState: any,
     formData: FormData
   ) => Promise<
     | {
