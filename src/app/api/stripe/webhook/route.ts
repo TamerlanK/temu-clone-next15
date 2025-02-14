@@ -91,7 +91,7 @@ export async function POST(req: Request) {
               _ref: item.sanityProductId,
             },
             quantity: item.quantity,
-            price: String(item.price),
+            price: item.price,
           })),
           status: "processing",
         })
