@@ -7,11 +7,16 @@ type ProductGridProps = {
 
 const ProductGrid = ({ products }: ProductGridProps) => {
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+    <ul
+      className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4"
+      role="list"
+    >
       {products.map((product) => (
-        <ProductItem key={product._id} product={product} />
+        <li key={product._id}>
+          <ProductItem product={product} />
+        </li>
       ))}
-    </div>
+    </ul>
   )
 }
 
